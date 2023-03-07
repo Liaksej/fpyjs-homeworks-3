@@ -22,7 +22,13 @@ class GoodsList {
   get list() {
     return this.#goods
       .filter((good) => this.filter.test(good.name))
-      .sort((a, b) => a.price - b.price);
+      .sort((a, b) => {
+        if (this.sortDir === true) {
+          return a.price - b.price;
+        } else if (this.sortDir === false) {
+          return b.price - a.price;
+        }
+      });
   }
   add(good) {
     return this.#goods.push(good);
@@ -45,7 +51,8 @@ class Basket {
   }
   get totalAmount() {
     return this.goods.reduce(
-      (accumulator, currentElement) => accumulator + currentElement.amount
+      (accumulator, element) => accumulator + element.amount,
+      0
     );
   }
   get totalSum() {
@@ -81,7 +88,7 @@ let good3 = new Good(3, "IPA", "Крафтовое пиво", [0.3, 0.5], 100, f
 let good4 = new Good(4, "Sour", "Бельгийское пиво", [0.3, 0.5], 100, true);
 let good5 = new Good(5, "Ale", "Английское пиво", [0.5, 1], 110, false);
 
-let allGoods = new GoodsList([good1, good2, good3, good4, good5], /А-я/);
+let allGoods = new GoodsList([good1, good2, good3], /[A-Za-z]/, true, true);
 
 let cartItem1 = new BasketGood(
   1,
@@ -102,4 +109,23 @@ let cartItem2 = new BasketGood(
   8
 );
 
-let shoppingCart = new Basket([cartItem1, cartItem2]);
+good3.setAvailable(true);
+good3.setAvailable(false);
+
+allGoods.add(good4);
+allGoods.add(good5);
+allGoods.remove(1);
+allGoods.remove(2);
+allGoods.add(good1);
+allGoods.add(good2);
+
+allGoods.list;
+
+allGoods.sortDir = false;
+allGoods.filter = /[А-Яа-я]/;
+
+myCart = new Basket([cartItem1, cartItem2]);
+
+let amount = myCart.totalAmount;
+
+allGoods.good3.setAvailable(false);
