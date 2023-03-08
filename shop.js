@@ -23,10 +23,12 @@ class GoodsList {
     return this.#goods
       .filter((good) => this.filter.test(good.name))
       .sort((a, b) => {
-        if (this.sortDir === true) {
-          return a.price - b.price;
-        } else if (this.sortDir === false) {
-          return b.price - a.price;
+        if (this.sortPrice === true) {
+          if (this.sortDir === true) {
+            return a.price - b.price;
+          } else if (this.sortDir === false) {
+            return b.price - a.price;
+          }
         }
       });
   }
@@ -56,22 +58,38 @@ class Basket {
     );
   }
   get totalSum() {
-    let totalSum;
-    this.goods.forEach((good) => (totalSum += good.price));
+    let totalSum = 0;
+    this.goods.forEach((good) => (totalSum += good.price * good.amount));
     return totalSum;
   }
   add(good, amount) {
-    if (this.goods.find((element) => element.id === good)) {
-      return this.goods.map((element, good) => (element.amount += amount));
+    if (this.goods.find((element) => element.id === good.id)) {
+      return (this.goods[
+        this.goods.findIndex((element) => element.id === good.id)
+      ].amount += amount);
     } else {
-      return this.goods.push({ good: amount });
+      let cartGood = new BasketGood(
+        good.id,
+        good.name,
+        good.description,
+        good.size,
+        good.price,
+        good.available,
+        amount
+      );
+      return this.goods.push(cartGood);
     }
   }
   remove(good, amount) {
-    if (this.goods.good.amount - amount > 0) {
-      return this.goods.map((element, good) => (element.amount -= amount));
+    if (
+      this.goods[this.goods.findIndex((element) => element.id === good.id)]
+        .amount > amount
+    ) {
+      return (this.goods[
+        this.goods.findIndex((element) => element.id === good.id)
+      ].amount -= amount);
     } else {
-      return this.goods.splice((element) => element.id === good, 1);
+      return this.goods.splice(good, 1);
     }
   }
   clear() {
@@ -119,13 +137,33 @@ allGoods.remove(2);
 allGoods.add(good1);
 allGoods.add(good2);
 
-allGoods.list;
-
 allGoods.sortDir = false;
+
+console.log(allGoods.list);
+
+allGoods.sortDir = true;
 allGoods.filter = /[А-Яа-я]/;
+
+console.log(allGoods.list);
+
+allGoods.sortPrice = false;
+
+console.log(allGoods.list);
 
 myCart = new Basket([cartItem1, cartItem2]);
 
-let amount = myCart.totalAmount;
+myCart.clear();
 
-allGoods.good3.setAvailable(false);
+myCart.add(good1, 12);
+myCart.add(good4, 4);
+myCart.add(good1, 20);
+myCart.add(good2, 8);
+myCart.add(good5, 8);
+
+myCart.remove(good2, 4);
+myCart.remove(good4, 4);
+
+myCart.removeUnavailable();
+
+console.log(`Количество товаров в корзине: ${myCart.totalAmount}`);
+console.log(`Общая стоимость товаров в корзине: ${myCart.totalSum}`);
